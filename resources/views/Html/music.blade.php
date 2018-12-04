@@ -13,7 +13,9 @@
     </style>
 </head>
 <body>
+    <div class="container">
 
+    </div>
 <script type="text/javascript" src="{{asset('/common/js/jquery2.2.1/jquery.min.js')}}"></script>
 </body>
 </html>

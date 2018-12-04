@@ -133,7 +133,7 @@
                         <div class="deco-level">NO.1</div>
                         <div class="deco-title">这是一条标题</div>
                         <video id="videoId1" style="width: 100%" controls="controls"
-                               src="{{asset('res/1.mp4')}}"></video>
+                               src="https://video.pc6.com/v/1809/dyjxxz3.mp4"></video>
                     </div>
                     <div class="msg-box">
                         <div class="author">作者：你是哦啊</div>
@@ -213,7 +213,7 @@
                         <div class="deco-level">NO.1</div>
                         <div class="deco-title">这是一条标题</div>
                         <video id="videoId3" style="width: 100%" controls="controls"
-                               src="{{asset('res/1.mp4')}}"></video>
+                               src="https://video.pc6.com/v/1809/dyjxxz3.mp4"></video>
                     </div>
                     <div class="msg-box">
                         <div class="author">作者：你是哦啊</div>
@@ -227,7 +227,7 @@
     </div>
     <div class="table-bottom"></div>
 
-    <p style="text-align: center;padding: 20px 0;">本活动最终解释权归酷匠网所有 黄帝炎帝蚩尤</p>
+    <p style="text-align: center;padding: 20px 0;">本活动最终解释权归酷匠网所有</p>
 </div>
 <script type="text/javascript" src="https://s.kjcdn.com/wap/js/jquery-1.9.1.min.js"></script>
 <script>

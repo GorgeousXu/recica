@@ -16,6 +16,7 @@
             width: 100%;
             max-width: 420px;
             margin: 0 auto;
+            overflow: hidden;
         }
         .chapter-box p{
             text-align: center;
@@ -33,18 +34,19 @@
             border-radius: 50%;
             margin: 20px auto;
             box-shadow: 5px 5px 20px #9e9e9e5e;
-
-            /*animation:play 30s linear infinite;*/
+        }
+        .cover-active{
+            animation:play 30s linear infinite;
         }
 
-        /*@keyframes play{*/
-            /*0% {*/
-                /*transform: rotate(0deg);*/
-            /*}*/
-            /*100% {*/
-                /*transform: rotate(360deg);*/
-            /*}*/
-        /*}*/
+        @keyframes play{
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
 
         /*播放进度条*/
         .bar-box{
@@ -87,7 +89,7 @@
             top: 0;
             bottom: 0;
             right: 0;
-            left:30%;
+            left: 0;
             background: #e5e5e5;
         }
         .slider-dot-control{
@@ -215,6 +217,7 @@
             padding-right: 2px;
         }
         .item-box .yinpin{
+            display: none;
             position: absolute;
             right: 0;
             font-size: 24px;
@@ -300,7 +303,7 @@
     <div class="container">
         {{--标题部分--}}
         <div class="chapter-box">
-            <p class="chapter-name">第一章 纵横之术</p>
+            <p class="chapter-name" id="chapterName"></p>
             <p class="speaker">主讲：徐徐</p>
         </div>
 
@@ -332,75 +335,27 @@
                     <span class="iconfont icon-shangyishouxianxing"></span>
                 </div>
                 <div class="player-control-play">
-                    <span class="iconfont icon-bofang1 icon-center"></span>
+                    <span id="iconPlay" class="iconfont icon-bofang icon-center"></span>
                 </div>
                 <div class="player-control-next">
                     <span class="iconfont icon-xiayishouxianxing"></span>
                 </div>
             </div>
         </div>
+
+        <audio muted src="http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a" id="bookAudio"></audio>
     </div>
 
     <div class="black-mask" id="catelist">
         <div class="category-list">
             <div class="popup-header">
                 <span class="header">播放列表</span>
-                <span class="desc">共60集</span>
+                <span class="desc" id="audioCount"></span>
                 <span class="popup-close iconfont icon-guanbi"></span>
             </div>
 
             <div class="move-list">
-                <ul class="popup-list">
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                            <span class="yinpin iconfont icon-yinpin"></span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话<span class="iconfont icon-vip"></span></div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="item-box">
-                            <div class="title">第一章 好好说话</div>
-                            <span class="iconfont icon-time"></span><span class="time">13:14</span>
-                        </div>
-                    </li>
-                </ul>
+                <ul class="popup-list" id="audioList"></ul>
             </div>
         </div>
     </div>
@@ -445,6 +400,169 @@
     </div>
 <script type="text/javascript" src="{{asset('/common/js/jquery2.2.1/jquery.min.js')}}"></script>
 <script>
+    var bAudio = document.getElementById('bookAudio');
+    var audioList = $('#audioList');
+    var chapterName = $('#chapterName');
+    var playControl = $('.player-control-play')[0];  //播放或者暂停
+
+    var sliderBar = $('.slider-bar')[0]; //进度条轨道
+    var sliderProgress = $('.slider-progress')[0]; //进度条
+    var playedProgress = $('.played-progress')[0]; //播放时间
+    var allProgress = $('.all-progress')[0]; //音频总时长
+    var dot = $('.slider-dot-control')[0]; //音频进度小圆点
+
+    var prev = $('.player-control-prev')[0]; //上一首
+    var next = $('.player-control-next')[0]; //下一首
+    var curIndex = 0; //默认播放的是第一首
+
+    var isPlay = false;
+    var timer; //设置一个定时器
+
+    var list = [
+        {'title':'第一章 好好说话','time':'06:54','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
+        {'title':'第二章 好好做人','time':'04:50','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
+        {'title':'第三章 好好发育','time':'05:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':1},
+        {'title':'第四章 厚积薄发','time':'09:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':1}
+    ];
+
+    initAudioList();
+    //初始化音频数据列表
+    function initAudioList() {
+        var html = '';
+        $('#audioCount').html('共'+list.length+'集');
+        $.each(list,function (key,value) {
+            html += '<li data-index="'+key+'"><div class="item-box">' +
+                '<div class="title">'+value['title'];
+            if(value['is_vip']){
+                html += '<span class="iconfont icon-vip"></span>';
+            }
+            html += '</div><span class="iconfont icon-time"></span>' +
+                '<span class="time">'+value['time']+'</span>' +
+                '<span class="yinpin iconfont icon-yinpin"></span>';
+            html += '</div></li>';
+        });
+        audioList.html(html);
+    }
+
+    $('#audioList li').on('click',function () {
+        var index = $(this).attr('data-index');
+        changeAudio(index);
+    });
+    
+    function changeAudio(index) {
+        $(bAudio).attr('src',list[index]['src']);
+        $(chapterName).html(list[index]['title']);
+        $(allProgress).html(list[index]['time']);
+
+        $('.yinpin').each(function (index_s,item) {
+            if(index_s == index){
+                $(this).show();
+            }else {
+                $(this).hide();
+            }
+        });
+
+        //进度条归零
+        $(sliderProgress).css('left',0);
+        $('.played-progress').html('00:00');
+    }
+    changeAudio(0);
+
+    $(next).on('click',function () {
+        curIndex ++;
+        changeAudio(curIndex);
+        setTimeout(function () {
+            bAudio.play();
+        },200)
+    });
+    $(prev).on('click',function () {
+        curIndex --;
+        changeAudio(curIndex);
+        setTimeout(function () {
+            bAudio.play();
+        },200)
+    });
+
+
+
+    $(playControl).on('click',function () {
+        if(isPlay){
+            bAudio.pause();
+            isPlay = false;
+            $('#iconPlay').removeClass('icon-bofang1').addClass('icon-bofang');
+            $('.book-cover').removeClass('cover-active');
+            timer = clearInterval(timer);
+        }else{
+            bAudio.play();
+            isPlay = true;
+            $(allProgress).html(format(bAudio.duration));
+            $('#iconPlay').removeClass('icon-bofang').addClass('icon-bofang1');
+            $('.book-cover').addClass('cover-active');
+            timer = setInterval(setProgress,1000);
+        }
+    });
+
+
+    //设置进度条进度
+    function setProgress() {
+        var percent = bAudio.currentTime/bAudio.duration * 100;
+        $(sliderProgress).css('left',percent+'%');
+        $(playedProgress).html(format(bAudio.currentTime));
+    }
+
+    //可以点击轨道改变进度
+    sliderBar.addEventListener('click',function (ev) {
+        var ev = ev || event;
+        changeProgress(ev.clientX);
+    });
+//    sliderBar.onmousedown=function (ev) {
+//        changeProgress(ev);
+//    };
+
+    //鼠标拖动小圆改变进度
+//    var power=false;
+//    dot.addEventListener('touchstart',function (e) {
+//        var touch=e.touches[0];
+//        power=true;
+//    });
+    dot.addEventListener('touchmove',function (e) {
+        var touch=e.touches[0];
+        changeProgress(touch.clientX);
+    });
+//    dot.addEventListener('touchend',function (e) {
+//        bAudio.play();
+//    });
+
+
+    function changeProgress(clientX){
+        var width = sliderBar.clientWidth;
+        var percent = parseInt(clientX - 55) / width * 100;
+        if(percent < 0){
+            percent = 0
+        }
+        if(percent > 100){
+            percent = 100;
+        }
+
+        $(sliderProgress).css('left',percent+'%');
+        bAudio.currentTime=percent/100*bAudio.duration;    //设置当前时间，以改变真正的播放进度
+        $(playedProgress).html(format(bAudio.currentTime));
+    }
+
+    //时间格式化为 分：秒
+    function format(time) {
+        time = parseInt(time);
+        var fen=parseInt(time/60);
+        var miao=time%60;
+        if(fen<=9){
+            fen="0"+fen;
+        }
+        if(miao<=9){
+            miao="0"+miao;
+        }
+        return fen+':'+miao;
+    }
+
     $('.category-control').on('click',function () {
         $('#catelist').show();
     });

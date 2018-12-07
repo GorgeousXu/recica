@@ -459,36 +459,21 @@
     //初始化音频列表
     initAudioList();
     //默认播放的第一首音频
-    changeAudio(0);
+    changeAudio(curIndex);
     //点击音频列表切换歌曲
     $('#audioList li').on('click',function () {
-        var index = $(this).attr('data-index');
-        changeAudio(index);
-        curIndex = index;
-        setTimeout(function () {
-            bAudio.play();
-            play();
-        },200)
+        curIndex = $(this).attr('data-index');
+        changeAudio(curIndex);
     });
     //点击按钮切换下一首
     $(next).on('click',function () {
         curIndex ++;
-        if(changeAudio(curIndex)){
-            setTimeout(function () {
-                bAudio.play();
-                play();
-            },200)
-        }
+        changeAudio(curIndex);
     });
     //点击按钮切换上一首
     $(prev).on('click',function () {
         curIndex --;
-        if(changeAudio(curIndex)){
-            setTimeout(function () {
-                bAudio.play();
-                play();
-            },200)
-        }
+        changeAudio(curIndex);
     });
     //控制音频播放和暂停
     $(playControl).on('click',function () {
@@ -589,6 +574,18 @@
         //封面归位
         $('.book-cover').removeClass('cover-active');
         paused();
+
+        //判断是不是要花钱 能不能播放
+        var is_vip = list[index]['is_vip'];
+        if(is_vip == 1){
+            $('#dingYue').show();
+            return false;
+        }
+
+        setTimeout(function () {
+            bAudio.play();
+            play();
+        },200);
         return true;
     }
     //播放
@@ -654,8 +651,8 @@
     $('.popup-close').on('click',function () {
         $('#catelist').hide();
     });
-    $('#dingyue').on('click',function () {
-        $('#dingyue').hide();
+    $('#dingYue').on('click',function () {
+        $('#dingYue').hide();
     });
     $('#buy').on('click',function () {
         $('#buy').hide();

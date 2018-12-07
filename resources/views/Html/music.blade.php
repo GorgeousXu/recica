@@ -301,6 +301,28 @@
             -webkit-border-radius: 10%;
         }
 
+        .mask-msg{
+            display: none;
+            position: fixed;
+            top: 70%;
+            left: 50%;
+            margin: 0 auto;
+            padding: 10px;
+            max-width: 300px;
+            -webkit-transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%);
+
+            background-color: rgba(3,3,3,.8);
+            -webkit-box-shadow: 0 0 4px #999;
+            box-shadow: 0 0 4px #999;
+            -webkit-border-radius: 8px;
+            border-radius: 8px;
+        }
+
+        .mask-desc{
+            color: #fff;
+        }
+
     </style>
 </head>
 <body>
@@ -347,7 +369,7 @@
             </div>
         </div>
 
-        <audio src="http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a" id="bookAudio"></audio>
+        <audio src="http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a" id="bookAudio" data-index="1"></audio>
     </div>
 
     <div class="black-mask" id="catelist">
@@ -402,6 +424,10 @@
             </div>
         </div>
     </div>
+
+    <div class="mask-msg">
+        <div class="mask-desc">列表循环</div>
+    </div>
 <script type="text/javascript" src="{{asset('/common/js/jquery2.2.1/jquery.min.js')}}"></script>
 <script>
     var bAudio = document.getElementById('bookAudio');
@@ -417,7 +443,7 @@
 
     var prev = $('.player-control-prev')[0]; //上一首
     var next = $('.player-control-next')[0]; //下一首
-    var curIndex = 0; //默认播放的是第一首
+    var curIndex = $(bAudio).attr('data-index'); //默认播放的用户点击进去的一首
 
     var timer; //设置一个定时器
     var power = false; //是否是手动控制进度条
@@ -428,15 +454,17 @@
         {'title':'第三章 好好发育','time':'05:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':1},
         {'title':'第四章 厚积薄发','time':'09:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':1}
     ];
+    var length = 1; //列表个数
 
     //初始化音频列表
     initAudioList();
     //默认播放的第一首音频
     changeAudio(0);
-    //点击音频裂变切换歌曲
+    //点击音频列表切换歌曲
     $('#audioList li').on('click',function () {
         var index = $(this).attr('data-index');
         changeAudio(index);
+        curIndex = index;
         setTimeout(function () {
             bAudio.play();
             play();
@@ -445,20 +473,22 @@
     //点击按钮切换下一首
     $(next).on('click',function () {
         curIndex ++;
-        changeAudio(curIndex);
-        setTimeout(function () {
-            bAudio.play();
-            play();
-        },200)
+        if(changeAudio(curIndex)){
+            setTimeout(function () {
+                bAudio.play();
+                play();
+            },200)
+        }
     });
     //点击按钮切换上一首
     $(prev).on('click',function () {
         curIndex --;
-        changeAudio(curIndex);
-        setTimeout(function () {
-            bAudio.play();
-            play();
-        },200)
+        if(changeAudio(curIndex)){
+            setTimeout(function () {
+                bAudio.play();
+                play();
+            },200)
+        }
     });
     //控制音频播放和暂停
     $(playControl).on('click',function () {
@@ -475,7 +505,6 @@
         if(!power){
             curIndex ++;
             changeAudio(curIndex);
-            console.log(bAudio.paused);
         }
     };
     //检测音频播放事件
@@ -509,13 +538,11 @@
         power = false;
     });
 
-
-
-
     //初始化音频数据列表
     function initAudioList() {
         var html = '';
-        $('#audioCount').html('共'+list.length+'集');
+        length = list.length;
+        $('#audioCount').html('共'+length+'集');
         $.each(list,function (key,value) {
             html += '<li data-index="'+key+'"><div class="item-box">' +
                 '<div class="title">'+value['title'];
@@ -531,10 +558,19 @@
     }
     //切歌
     function changeAudio(index) {
-        if(index > 3 || index < 0){
-            index = 3;
+        if(index >= length){
+            show_msg('列表播放完毕啦～');
+            paused();
+            return false;
         }
+        if(index < 0){
+            show_msg('已经是第一集啦～');
+            paused();
+            return false;
+        }
+
         $(bAudio).attr('src',list[index]['src']);
+        $(bAudio).attr('data-index',index);
         $(chapterName).html(list[index]['title']);
         $(allProgress).html(list[index]['time']);
 
@@ -553,10 +589,11 @@
         //封面归位
         $('.book-cover').removeClass('cover-active');
         paused();
+        return true;
     }
     //播放
     function play() {
-        $(allProgress).html(format(bAudio.duration));
+//        $(allProgress).html(format(bAudio.duration));
         $('#iconPlay').removeClass('icon-bofang').addClass('icon-bofang1');
         $('.book-cover').addClass('cover-active');
         $('.book-cover').css('animation-play-state','running');
@@ -601,6 +638,11 @@
             miao="0"+miao;
         }
         return fen+':'+miao;
+    }
+    //提示信息
+    function show_msg(msg) {
+        $('.mask-desc').html(msg);
+        $('.mask-msg').fadeIn().delay(500).fadeOut();
     }
 
     $('.category-control').on('click',function () {

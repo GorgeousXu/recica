@@ -37,6 +37,10 @@
         }
         .cover-active{
             animation:play 30s linear infinite;
+            -webkit-animation-fill-mode: forwards;
+            -moz-animation-fill-mode: forwards;
+            -o-animation-fill-mode: forwards;
+            animation-fill-mode: forwards;
         }
 
         @keyframes play{
@@ -343,7 +347,7 @@
             </div>
         </div>
 
-        <audio muted src="http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a" id="bookAudio"></audio>
+        <audio src="http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a" id="bookAudio"></audio>
     </div>
 
     <div class="black-mask" id="catelist">
@@ -415,8 +419,8 @@
     var next = $('.player-control-next')[0]; //下一首
     var curIndex = 0; //默认播放的是第一首
 
-    var isPlay = false;
     var timer; //设置一个定时器
+    var power = false; //是否是手动控制进度条
 
     var list = [
         {'title':'第一章 好好说话','time':'06:54','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
@@ -425,7 +429,89 @@
         {'title':'第四章 厚积薄发','time':'09:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':1}
     ];
 
+    //初始化音频列表
     initAudioList();
+    //默认播放的第一首音频
+    changeAudio(0);
+    //点击音频裂变切换歌曲
+    $('#audioList li').on('click',function () {
+        var index = $(this).attr('data-index');
+        changeAudio(index);
+        setTimeout(function () {
+            bAudio.play();
+            play();
+        },200)
+    });
+    //点击按钮切换下一首
+    $(next).on('click',function () {
+        curIndex ++;
+        changeAudio(curIndex);
+        setTimeout(function () {
+            bAudio.play();
+            play();
+        },200)
+    });
+    //点击按钮切换上一首
+    $(prev).on('click',function () {
+        curIndex --;
+        changeAudio(curIndex);
+        setTimeout(function () {
+            bAudio.play();
+            play();
+        },200)
+    });
+    //控制音频播放和暂停
+    $(playControl).on('click',function () {
+        if(bAudio.paused){
+            bAudio.play();
+            play();
+        }else{
+            bAudio.pause();
+            paused();
+        }
+    });
+    //检测音频结束事件
+    bAudio.onended = function () {
+        if(!power){
+            curIndex ++;
+            changeAudio(curIndex);
+            console.log(bAudio.paused);
+        }
+    };
+    //检测音频播放事件
+    bAudio.onplay = function () {
+        play();
+    };
+    //检测音频暂停事件
+    bAudio.onpaused = function () {
+        paused();
+    };
+
+    //点击进度条改变音频播放进度
+    sliderBar.addEventListener('click',function (ev) {
+        var ev = ev || event;
+        changeProgress(ev.clientX - 5);
+    });
+
+    //鼠标拖动小圆改变进度 开始 进行中 结束
+    dot.addEventListener('touchstart',function (e) {
+        power = true;
+    });
+    dot.addEventListener('touchmove',function (e) {
+        var touch=e.touches[0];
+        changeProgress(touch.clientX);
+        if(bAudio.ended){
+            bAudio.pause();
+            paused();
+        }
+    });
+    dot.addEventListener('touchend',function (e) {
+        power = false;
+    });
+
+
+
+
     //初始化音频数据列表
     function initAudioList() {
         var html = '';
@@ -443,13 +529,11 @@
         });
         audioList.html(html);
     }
-
-    $('#audioList li').on('click',function () {
-        var index = $(this).attr('data-index');
-        changeAudio(index);
-    });
-    
+    //切歌
     function changeAudio(index) {
+        if(index > 3 || index < 0){
+            index = 3;
+        }
         $(bAudio).attr('src',list[index]['src']);
         $(chapterName).html(list[index]['title']);
         $(allProgress).html(list[index]['time']);
@@ -465,75 +549,32 @@
         //进度条归零
         $(sliderProgress).css('left',0);
         $('.played-progress').html('00:00');
+
+        //封面归位
+        $('.book-cover').removeClass('cover-active');
+        paused();
     }
-    changeAudio(0);
-
-    $(next).on('click',function () {
-        curIndex ++;
-        changeAudio(curIndex);
-        setTimeout(function () {
-            bAudio.play();
-        },200)
-    });
-    $(prev).on('click',function () {
-        curIndex --;
-        changeAudio(curIndex);
-        setTimeout(function () {
-            bAudio.play();
-        },200)
-    });
-
-
-
-    $(playControl).on('click',function () {
-        if(isPlay){
-            bAudio.pause();
-            isPlay = false;
-            $('#iconPlay').removeClass('icon-bofang1').addClass('icon-bofang');
-            $('.book-cover').removeClass('cover-active');
-            timer = clearInterval(timer);
-        }else{
-            bAudio.play();
-            isPlay = true;
-            $(allProgress).html(format(bAudio.duration));
-            $('#iconPlay').removeClass('icon-bofang').addClass('icon-bofang1');
-            $('.book-cover').addClass('cover-active');
-            timer = setInterval(setProgress,1000);
-        }
-    });
-
-
-    //设置进度条进度
+    //播放
+    function play() {
+        $(allProgress).html(format(bAudio.duration));
+        $('#iconPlay').removeClass('icon-bofang').addClass('icon-bofang1');
+        $('.book-cover').addClass('cover-active');
+        $('.book-cover').css('animation-play-state','running');
+        timer = setInterval(setProgress,1000);
+    }
+    //暂停
+    function paused() {
+        $('#iconPlay').removeClass('icon-bofang1').addClass('icon-bofang');
+        $('.book-cover').css('animation-play-state','paused');
+        timer = clearInterval(timer);
+    }
+    //自动变换进度条进度
     function setProgress() {
         var percent = bAudio.currentTime/bAudio.duration * 100;
         $(sliderProgress).css('left',percent+'%');
         $(playedProgress).html(format(bAudio.currentTime));
     }
-
-    //可以点击轨道改变进度
-    sliderBar.addEventListener('click',function (ev) {
-        var ev = ev || event;
-        changeProgress(ev.clientX);
-    });
-//    sliderBar.onmousedown=function (ev) {
-//        changeProgress(ev);
-//    };
-
-    //鼠标拖动小圆改变进度
-//    var power=false;
-//    dot.addEventListener('touchstart',function (e) {
-//        var touch=e.touches[0];
-//        power=true;
-//    });
-    dot.addEventListener('touchmove',function (e) {
-        var touch=e.touches[0];
-        changeProgress(touch.clientX);
-    });
-//    dot.addEventListener('touchend',function (e) {
-//        bAudio.play();
-//    });
-
-
+    //手动改变进度
     function changeProgress(clientX){
         var width = sliderBar.clientWidth;
         var percent = parseInt(clientX - 55) / width * 100;
@@ -548,7 +589,6 @@
         bAudio.currentTime=percent/100*bAudio.duration;    //设置当前时间，以改变真正的播放进度
         $(playedProgress).html(format(bAudio.currentTime));
     }
-
     //时间格式化为 分：秒
     function format(time) {
         time = parseInt(time);

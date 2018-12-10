@@ -112,7 +112,9 @@
         }
 
         .control-box{
-            margin: 20px 10px 0;
+            margin: 10px 10px 0;
+            height: 50px;
+            line-height: 50px;
         }
         .control-box:after{
             content: '';
@@ -130,7 +132,6 @@
         }
         .control-box .icon-center{
             font-size: 40px;
-            line-height: 30px;
             color: #ff2000;
         }
 
@@ -165,7 +166,23 @@
             bottom: 0;
             width: 100%;
             background-color: #fafafa;
+
+            -webkit-animation: catelist .3s;
+            -o-animation: catelist .3s;
+            animation: catelist .3s;
         }
+
+        @keyframes catelist /* Safari and Chrome */
+        {
+            0%{opacity:0;-webkit-transform:translateY(100px);}
+            100%{opacity:1;-webkit-transform:translateY(0);}
+        }
+        @-webkit-keyframes catelist /* Safari and Chrome */
+        {
+            0%{opacity:0;-webkit-transform:translateY(100px);}
+            100%{opacity:1;-webkit-transform:translateY(0);}
+        }
+
         .popup-header{
             height: 40px;
             line-height: 40px;
@@ -240,6 +257,26 @@
             width: 100%;
             background-color: #fafafa;
             height: 240px;
+
+            -webkit-animation: buybox .3s;
+            -o-animation: buybox .3s;
+            animation: buybox .3s;
+        }
+        @keyframes buybox{
+            0%{
+                height: 150px;
+            }
+            100%{
+                height: 240px;
+            }
+        }
+        @-webkit-keyframes buybox{
+            0%{
+                height: 150px;
+            }
+            100%{
+                height: 240px;
+            }
         }
         .expensive-div{
             padding: 20px;
@@ -459,7 +496,7 @@
     //初始化音频列表
     initAudioList();
     //默认播放的第一首音频
-    changeAudio(curIndex);
+//    changeAudio(curIndex);
     //点击音频列表切换歌曲
     $('#audioList li').on('click',function () {
         curIndex = $(this).attr('data-index');
@@ -642,20 +679,26 @@
         $('.mask-msg').fadeIn().delay(500).fadeOut();
     }
 
+    //    自动订阅下一章
+    $("#subscribe").change(function () {
+        var is_auto = $("#subscribe").is(':checked');
+        if (is_auto) {
+            $('.sub-in').show();
+            $('.sub-border').css('border', '2px #ff2000 solid');
+        } else {
+            $('.sub-in').hide();
+            $('.sub-border').css('border', '2px #9e9e9e solid');
+        }
+    });
+
     $('.category-control').on('click',function () {
-        $('#catelist').show();
+        $('#catelist').fadeIn(200);
     });
     $('#catelist').on('click',function () {
-        $('#catelist').hide();
+        $('#catelist').fadeOut(200);
     });
     $('.popup-close').on('click',function () {
         $('#catelist').hide();
-    });
-    $('#dingYue').on('click',function () {
-        $('#dingYue').hide();
-    });
-    $('#buy').on('click',function () {
-        $('#buy').hide();
     });
 </script>
 </body>

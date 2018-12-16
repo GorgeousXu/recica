@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="{{asset('css/iconfont.css')}}">
     <title>音乐播放器</title>
     <style>
+        /*移动端触摸不会出现阴影*/
+        * {
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            -webkit-tap-highlight-color: transparent;
+        }
         body{
             margin: 0;
             padding: 0;
@@ -206,10 +211,17 @@
             padding: 0 20px;
             font-size: 20px;
         }
-        .move-list{
+        .move-list {
             height: 350px;
             overflow-x: hidden;
             overflow-y: auto;
+            overflow-scrolling: touch;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /*和上面的touch css 配合使用，解决ios端滑动不顺畅的问题*/
+        .move-list:after {
+            min-height: calc(100% + 1px);
         }
         ul.popup-list{
             margin: 0 auto;

@@ -508,7 +508,24 @@
     //初始化音频列表
     initAudioList();
     //默认播放的第一首音频
-//    changeAudio(curIndex);
+
+    var ua = window.navigator.userAgent.toLowerCase();
+    var is_weixin = false;
+    if (ua.match(/MicroMessenger/i) == 'micromessenger') {
+        is_weixin = true;
+    }
+
+    //初始化音频列表
+    initAudioList();
+    if (is_weixin) {
+        //--创建页面监听，等待微信端页面加载完毕 触发音频播放
+        document.addEventListener('WeixinJSBridgeReady', function () {
+            changeAudio(curChapter);
+        }, false);
+    } else {
+//        changeAudio(curIndex);
+    }
+
     //点击音频列表切换歌曲
     $('#audioList li').on('click',function () {
         curIndex = $(this).attr('data-index');

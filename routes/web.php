@@ -30,3 +30,5 @@ Route::post('ajax_turntable','\App\Http\Controllers\HtmlController@ajax_turntabl
 Route::get('video','\App\Http\Controllers\HtmlController@video');
 
 Route::get('music','\App\Http\Controllers\HtmlController@music');
+
+Route::get('danmu','\App\Http\Controllers\HtmlController@danmu');

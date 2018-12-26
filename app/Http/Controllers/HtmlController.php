@@ -108,4 +108,9 @@ class HtmlController extends Controller{
     public function music(){
         return view('html.music');
     }
+
+    /** 弹幕 */
+    public function danmu(){
+        return view('html.danmu');
+    }
 }

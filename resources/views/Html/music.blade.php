@@ -418,7 +418,7 @@
             </div>
         </div>
 
-        <audio src="http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a" id="bookAudio" data-index="1"></audio>
+        <audio src="" id="bookAudio" data-index="1"></audio>
     </div>
 
     <div class="black-mask" id="catelist">
@@ -480,6 +480,7 @@
 <script type="text/javascript" src="{{asset('/common/js/jquery2.2.1/jquery.min.js')}}"></script>
 <script>
     var bAudio = document.getElementById('bookAudio');
+
     var audioList = $('#audioList');
     var chapterName = $('#chapterName');
     var playControl = $('.player-control-play')[0];  //播放或者暂停
@@ -498,7 +499,7 @@
     var power = false; //是否是手动控制进度条
 
     var list = [
-        {'title':'第一章 好好说话','time':'06:54','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
+        {'title':'第一章 好好说话','time':'06:54','src':'','is_vip':0},
         {'title':'第二章 好好做人','time':'04:50','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
         {'title':'第三章 好好发育','time':'05:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
         {'title':'第四章 厚积薄发','time':'09:20','src':'http://audio.xmcdn.com/group53/M06/54/F2/wKgLcVwHBODwq5b1ADM2evKoLHY587.m4a','is_vip':0},
@@ -539,6 +540,8 @@
     });
     //点击按钮切换下一首
     $(next).on('click',function () {
+//        history.pushState(null, null, '/canvas');
+        history.replaceState(null, null, '/canvas');
         curIndex ++;
         changeAudio(curIndex);
     });
@@ -566,7 +569,11 @@
     });
     //音频可以播放的时候更改播放时长
     bAudio.addEventListener('canplay', function () {
-        $(allProgress).html(format(bAudio.duration));
+        if(isNaN(bAudio.duration)){
+
+        }else{
+            $(allProgress).html(format(bAudio.duration));
+        }
     });
 
     //检测音频播放事件

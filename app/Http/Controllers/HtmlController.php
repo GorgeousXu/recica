@@ -113,4 +113,9 @@ class HtmlController extends Controller{
     public function danmu(){
         return view('html.danmu');
     }
+
+    /** 公告文字轮播 */
+    public function wenzilunbo(){
+        return view('html.wzlb');
+    }
 }

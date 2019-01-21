@@ -32,3 +32,5 @@ Route::get('video','\App\Http\Controllers\HtmlController@video');
 Route::get('music','\App\Http\Controllers\HtmlController@music');
 
 Route::get('danmu','\App\Http\Controllers\HtmlController@danmu');
+
+Route::get('wenzilunbo','\App\Http\Controllers\HtmlController@wenzilunbo');

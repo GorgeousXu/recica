@@ -18,6 +18,9 @@ Route::get('/', function () {
 /** 数据库测试 */
 Route::get('data', '\App\Http\Controllers\IndexController@databaseUsage');
 
+/** 函数测试 */
+Route::get('func', '\App\Http\Controllers\FuncController@funcTest');
+
 /** 重点页面 */
 Route::get('waterfall', '\App\Http\Controllers\HtmlController@waterfall');
 Route::get('ajax_waterfall', '\App\Http\Controllers\HtmlController@ajax_waterfall');
